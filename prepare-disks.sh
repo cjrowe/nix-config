@@ -49,6 +49,81 @@ partition_size_is_valid() {
   [ "$valid_partition_size" == false ] && echo "Invalid partition size: [$1]" && exit_abnormal
 }
 
+partition_disks() {
+  for disk in "${1[@]}"
+  do
+    echo "Partitioning Disk [$disk]..."
+    sgdisk -n 0:0:+$BOOT_SIZE -t 0:ea00 -c 0:boot "$disk"
+    sgdisk -n 0:0:+$SWAP_SIZE -t 0:8200 -c 0:swap "$disk"
+    sgdisk -n 0:0:0 -t 0:8300 -c 0:root "$disk"
+    echo "Partitioning Complete..."
+    sgdisk -p "$disk"
+  done
+}
+
+create_efi_filesystem() {
+  for disk in "${1[@]}"
+  do
+    echo "Creating EFI filesystem on [$disk]..."
+    mkfs.vfat "$disk-part1"
+  done
+}
+
+enable_swap() {
+  for disk in "${1[@]}"
+  do
+    echo "Enabling Swap on [$disk]..."
+    mkswap "$disk-part2"
+    swapon "$disk-part2"
+  done
+}
+
+create_persistent_filesystem() {
+  echo "Creating persistent filesystem(s)..."
+  case "$2" in
+    impermanence-tmpfs-btrfs)
+      if [[ "$4" == true ]]
+      then
+        create_mirrored_btrfs_filesystem "${1[*]}" "$3"
+      else
+        create_single_btrfs_filesystem "${1[0]}" "$3"
+      fi
+      ;;
+  esac
+}
+
+create_mirrored_btrfs_filesystem() {
+  echo "Creating mirrored BTRFS filesystem..."
+  INDEX=1
+  FS_LOCATIONS=()
+  for disk in "${1[@]}"
+  do
+    fs_location="$disk-part3"
+    [ "$2" == true ] && luks_encrypt_partition "$disk" "$INDEX" && fs_location="/dev/mapper/crypt-$INDEX"
+    ((++INDEX))
+    FS_LOCATIONS+=(fs_location)
+  done
+
+  mkfs.btrfs -m raid1 -d raid1 "${FS_LOCATIONS[*]}"
+}
+
+create_single_btrfs_filesystem() {
+  echo "Creating single disk BTRFS filesystem..."
+  fs_location="$1-part3"
+  [ "$2" == true ] && luks_encrypt_partition "$disk" "$INDEX" && fs_location="/dev/mapper/crypt"
+  mkfs.btrfs "$fs_location"
+}
+
+luks_encrypt_partition() {
+  echo "LUKS encrypting partition [$1-part3]..."
+  echo "Enter passphrase when prompted..."
+  cryptsetup --verify-passphrase -v luksFormat "$1-part3"
+  cryptsetup open "$1-part3" "crypt-$2"
+}
+
+echo "NixOS Disk Preparation Script"
+echo "============================="
+
 while getopts "b:d:el:ms:" options; do
   case "${options}" in
     b)
@@ -84,9 +159,15 @@ number_of_disks_is_correct "${DISKS[*]}" $MIRROR
 partition_size_is_valid "$BOOT_SIZE"
 partition_size_is_valid "$SWAP_SIZE"
 
+echo "Disk(s) will be configured as follows:"
 echo "Layout is [$LAYOUT]"
 echo "Disks are ${DISKS[*]}"
 echo "Mirroring is [$MIRROR]"
 echo "Encryption in [$ENCRYPT]"
 echo "Boot Partition Size is [$BOOT_SIZE]"
 echo "Swap Partition Size is [$SWAP_SIZE]"
+
+partition_disks "${DISKS[*]}"
+create_efi_filesystem "${DISKS[*]}"
+enable_swap "${DISKS[*]}"
+create_persistent_filesystem "${DISKS[*]}" "$LAYOUT" "$ENCRYPT" "$MIRROR"
