@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 valid_layouts=("impermanence-tmpfs-btrfs")
+SUBVOL_PERSIST=persist
+SUBVOL_NIX=nix
+SUBVOL_NIXOS_CONFIG=nixos-config
+SUBVOL_LOGS=logs
 
 LAYOUT="impermanence-tmpfs-btrfs"
 DISKS=()
@@ -88,6 +92,19 @@ create_persistent_filesystem() {
       else
         create_single_btrfs_filesystem "${1[0]}" "$3"
       fi
+
+      btrfs_fs="${1[0]}-part3"
+      [ "$3" == true ] && btrfs_fs="/dev/mapper/crypt-1"
+      create_btrfs_impermanence_subvolumes "$btrfs_fs"
+      echo "Mounting / as tmpfs..." && mount -t tmpfs none /mnt
+      echo "Creating base directories..." && mkdir -p /mnt/{boot,home,nix,persist,etc/nixos,var/log}
+      echo "Mounting /boot..." && mount "${1[0]}-part1" /mnt/boot
+      [ "$4" == true ] && echo "Mounting /boot-fallback as boot mirror..." && mkdir -p /mnt/boot-fallback && mount "${1[1]}-part1" /mnt/boot-fallback
+      echo "Mounting /home as tmpfs..." && mount -t tmpfs none /mnt/home
+      echo "Mounting /nix..." && mount -o "subvol=$SUBVOL_NIX,compress=zstd,noatime" "$btrfs_fs" /mnt/nix
+      echo "Mounting /persist..." && mount -o "subvol=$SUBVOL_PERSIST,compress=zstd" "$btrfs_fs" /mnt/persist
+      echo "Mounting /etc/nixos..." && mount -o "subvol=$SUBVOL_NIXOS_CONFIG,compress=zstd" "$btrfs_fs" /mnt/etc/nixos
+      echo "Mounting /var/log..." && mount -o "subvol=$SUBVOL_LOGS,compress=zstd" "$btrfs_fs" /mnt/var/log
       ;;
   esac
 }
@@ -99,7 +116,7 @@ create_mirrored_btrfs_filesystem() {
   for disk in "${1[@]}"
   do
     fs_location="$disk-part3"
-    [ "$2" == true ] && luks_encrypt_partition "$disk" "$INDEX" && fs_location="/dev/mapper/crypt-$INDEX"
+    [ "$2" == true ] && luks_encrypt_partition "$disk-part3" "$INDEX" && fs_location="/dev/mapper/crypt-$INDEX"
     ((++INDEX))
     FS_LOCATIONS+=(fs_location)
   done
@@ -110,15 +127,30 @@ create_mirrored_btrfs_filesystem() {
 create_single_btrfs_filesystem() {
   echo "Creating single disk BTRFS filesystem..."
   fs_location="$1-part3"
-  [ "$2" == true ] && luks_encrypt_partition "$disk" "$INDEX" && fs_location="/dev/mapper/crypt"
+  [ "$2" == true ] && luks_encrypt_partition "$1-part3" "1" && fs_location="/dev/mapper/crypt-1"
   mkfs.btrfs "$fs_location"
 }
 
 luks_encrypt_partition() {
-  echo "LUKS encrypting partition [$1-part3]..."
+  echo "LUKS encrypting partition [$1]..."
   echo "Enter passphrase when prompted..."
-  cryptsetup --verify-passphrase -v luksFormat "$1-part3"
-  cryptsetup open "$1-part3" "crypt-$2"
+  cryptsetup --verify-passphrase -v luksFormat "$1"
+  cryptsetup open "$1" "crypt-$2"
+}
+
+create_btrfs_impermanence_subvolumes() {
+  echo "Creating BTRFS Subvolumes..."
+  mount -t btrfs "$1" /mnt
+
+  btrfs subvolume create "/mnt/$SUBVOL_SUBVOL_LOGS"
+  btrfs subvolume create "/mnt/$SUBVOL_NIX"
+  btrfs subvolume create "/mnt/$SUBVOL_NIXOS_CONFIG"
+  btrfs subvolume create "/mnt/$SUBVOL_PERSIST"
+
+  echo "BTRFS Subvolumes Created..."
+  btrfs subvolume list /mnt
+
+  umount /mnt
 }
 
 echo "NixOS Disk Preparation Script"
@@ -171,3 +203,6 @@ partition_disks "${DISKS[*]}"
 create_efi_filesystem "${DISKS[*]}"
 enable_swap "${DISKS[*]}"
 create_persistent_filesystem "${DISKS[*]}" "$LAYOUT" "$ENCRYPT" "$MIRROR"
+
+echo "Disk(s) Prepared..." && lsblk -f
+echo "Generating NixOS base configuration..." && nixos-generate-config --root /mnt
