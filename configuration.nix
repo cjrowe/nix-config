@@ -2,7 +2,9 @@
 {
   nix.extraOptions = ''
     ssl-cert-file = /Users/chris.rowe/.certs/Cloud-Services-Root-CA.pem
-  '';
+    '';
+
+  nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
@@ -21,8 +23,6 @@
     tldr
   ];
 
-  # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;
 
   # Necessary for using flakes on this system.
@@ -46,6 +46,6 @@
     name = "chris.rowe";
     home = "/Users/chris.rowe";
   };
-
-  security.pam.enableSudoTouchIdAuth = true;
+  
+  security.pam.services.sudo_local.touchIdAuth = true;
 }

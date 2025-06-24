@@ -12,7 +12,22 @@ in
 
   home.stateVersion = "24.05";
   programs.home-manager.enable = true;
-  home.packages = with pkgs; [];
+  home.packages = with pkgs; [
+    _1password-cli
+    gh
+    terraform
+    terraform-docs
+    husky
+    yamlfmt
+    yamllint
+    cacert
+    nodejs
+    tfswitch
+    yarn
+    python313
+    typescript
+    open-policy-agent
+  ];
   home.sessionVariables = {
     EDITOR = "vim";
 
@@ -23,6 +38,10 @@ in
 
   programs.zsh = {
     enable = true;
+    history = {
+      ignoreAllDups = true;
+      share = true;
+    };
     initExtra = ''
       sh ${nix-colors-lib.shellThemeFromScheme { scheme = config.colorScheme; }}
     '';
@@ -32,7 +51,7 @@ in
     enable = true;
     enableZshIntegration = true;
     git = true;
-    icons = true;
+    icons = "auto";
   };
 
   programs.direnv = {
