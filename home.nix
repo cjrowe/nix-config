@@ -44,6 +44,7 @@ in
     };
     initExtra = ''
       sh ${nix-colors-lib.shellThemeFromScheme { scheme = config.colorScheme; }}
+      cat ~/.config/nix-darwin/spw-ascii-art.txt
     '';
   };
 
