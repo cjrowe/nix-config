@@ -44,6 +44,7 @@ in
     typescript
     open-policy-agent
     volta
+    ghostty
   ];
 
   home.sessionVariables = {
