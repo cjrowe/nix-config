@@ -28,11 +28,12 @@ in
   home.stateVersion = "24.05";
   programs.home-manager.enable = true;
 
-  home.packages = with pkgs; [
+  home.packages = let
+    platformExtras = if pkgs.stdenv.isLinux then [ pkgs.xclip pkgs.wl-clipboard ] else [ ];
+  in with pkgs; [
     _1password-cli
     gh
     terraform
-    terraform-docs
     husky
     yamlfmt
     yamllint
@@ -44,8 +45,7 @@ in
     typescript
     open-policy-agent
     volta
-    ghostty
-  ];
+  ] ++ platformExtras;
 
   home.sessionVariables = {
     EDITOR = "vim";
@@ -149,17 +149,18 @@ in
     viAlias = true;
     vimAlias = true;
     vimdiffAlias = true;
-    extraPackages = with pkgs; [
-      lua-language-server
-      terraform-ls
-      tflint
-      typescript
-      xclip
-      wl-clipboard
-      yamlfmt
-      yamllint
-      yaml-language-server
-    ];
+    extraPackages =
+      let
+        linuxClipboard = with pkgs; (if pkgs.stdenv.isLinux then [ xclip wl-clipboard ] else []);
+      in with pkgs; [
+        lua-language-server
+        terraform-ls
+        tflint
+        typescript
+        yamlfmt
+        yamllint
+        yaml-language-server
+      ] ++ linuxClipboard;
     extraConfig = ''
     autocmd VimEnter * NERDTree | wincmd p
     let NERDTreeSortHiddenFirst=1
