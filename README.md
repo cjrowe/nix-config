@@ -11,7 +11,7 @@ This repository manages three host configurations plus a shared Home Manager lay
 
 Host | Type | Purpose | Home Profile
 -----|------|---------|-------------
-`macbook-spw` | macOS (Darwin) | Work laptop (corporate CA + work git email) | `home.nix` (wraps `home-common.nix`)
+`macbook-spw` | macOS (Darwin) | Work laptop (corporate CA + private email) | `home.nix` (wraps `home-common.nix`)
 `macbook-personal` | macOS (Darwin) | Personal laptop | `home-personal.nix` (wraps `home-common.nix`)
 `desktop-personal` | NixOS (WSL) | Personal WSL environment | `home-personal.nix`
 
@@ -80,7 +80,7 @@ The host definitions pass the appropriate Home Manager module import:
 ### Overridable Parameters (`home-common.nix`)
 Parameter | Description
 ----------|------------
-`gitUserEmail` | Git email for the profile
+`gitUserEmail` | Git email for the profile (may be null if hidden)
 `includeCorporateCA` | Adds `AWS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`, `REQUESTS_CA_BUNDLE`
 `caCertPath` | Path to corporate cert when enabled
 `asciiArtFile` | Optional banner displayed at shell init
@@ -144,6 +144,28 @@ For the work profile, the CA path is hard-coded in:
 - `configuration.nix` (`nix.extraOptions` / `ssl-cert-file`)
 - `home.nix` (via `home-common.nix` params)
 You can extract this into a secret or environment-specific overlay later if needed.
+
+## Private Git Identity (Hiding Emails)
+Real email addresses are no longer stored in tracked files. Instead a local, untracked file can be used:
+
+1. Copy the template:
+	```bash
+	cp home-identity.nix.example home-identity.nix
+	```
+2. Edit `home-identity.nix` with your real addresses:
+	```nix
+		 { email = "me@example.com"; }
+	```
+3. Rebuild as normal.
+
+If the file is absent, `gitUserEmail` remains unset in the Home Manager Git module, and your global Git config (if any) applies. This keeps emails out of the public branch while preserving reproducibility otherwise.
+
+Alternative strategies:
+- Use environment variables and pass them with `--impure` (reduces purity)
+- Reference a private flake input (`inputs.private-secrets.url = "path:../my-private-secrets";`)
+- Manage identity entirely outside Nix (`git config --global user.email ...`)
+- Rewrite repository history (e.g. `git filter-repo`) to purge prior commits (destructive; optional)
+
 
 ## Extending
 Ideas:

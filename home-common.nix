@@ -2,7 +2,7 @@
 , pkgs
 , nix-colors
 , asciiArtFile ? null
-, gitUserEmail
+, gitUserEmail ? null
 , includeCorporateCA ? false
 , caCertPath ? null
 , ... }:
@@ -84,18 +84,19 @@ in
     enableZshIntegration = true;
   };
 
-  programs.git = {
-    enable = true;
-    userName = "Chris Rowe";
-    userEmail = gitUserEmail;
-    signing = {
-      signByDefault = true;
-      key = "0x1813F3955C9120C1";
-    };
-    extraConfig = if includeCorporateCA && caCertPath != null then {
-      http.sslCAPath = caCertPath;
-    } else {};
-  };
+  programs.git =
+    let base = {
+      enable = true;
+      userName = "Chris Rowe";
+      signing = {
+        signByDefault = true;
+        key = "0x1813F3955C9120C1";
+      };
+      extraConfig = if includeCorporateCA && caCertPath != null then {
+        http.sslCAPath = caCertPath;
+      } else {};
+    }; in
+    if gitUserEmail != null then base // { userEmail = gitUserEmail; } else base;
 
   programs.starship = {
     enable = true;
