@@ -14,24 +14,65 @@
 
   outputs = { self, nix-darwin, nixpkgs, home-manager, nix-colors, ... }@inputs:
   {
-    # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#Mac-bec3b07704d39abf
-    darwinConfigurations."Mac-bec3b07704d39abf" = nix-darwin.lib.darwinSystem {
+    # Build Darwin configs using:
+    # $ darwin-rebuild switch --flake .#macbook-spw
+    # $ darwin-rebuild switch --flake .#macbook-personal
 
+    ##############################
+    # Work Mac (renamed)
+    ##############################
+    darwinConfigurations."macbook-spw" = nix-darwin.lib.darwinSystem {
       specialArgs = { inherit nix-colors; };
-      modules = [ 
-        ./configuration.nix 
+      modules = [
+        ./configuration.nix
         home-manager.darwinModules.home-manager {
           home-manager.extraSpecialArgs = { inherit nix-colors; };
-
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users."chris.rowe" = import ./home.nix;
+          home-manager.users."chris.rowe" = import ./home.nix; # Work profile
         }
       ];
     };
 
-    # Expose the package set, including overlays, for convenience.
-    darwinPackages = self.darwinConfigurations."Mac-bec3b07704d39abf".pkgs;
+    ##############################
+    # Personal Mac
+    ##############################
+    darwinConfigurations."macbook-personal" = nix-darwin.lib.darwinSystem {
+      specialArgs = { inherit nix-colors; };
+      modules = [
+        ./configuration.nix
+        # Override / extend any Darwin-specific settings if needed later via an inline module
+        ({ config, ... }: {
+          # Different hostname (optional if you want distinct network name)
+          networking.hostName = "macbook-personal";
+        })
+        home-manager.darwinModules.home-manager {
+          home-manager.extraSpecialArgs = { inherit nix-colors; };
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users."chris.rowe" = import ./home-personal.nix; # Personal profile
+        }
+      ];
+    };
+
+    ##############################
+    # Personal WSL (NixOS) Desktop
+    ##############################
+    nixosConfigurations."desktop-personal" = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux"; # WSL / desktop architecture assumption
+      specialArgs = { inherit nix-colors; };
+      modules = [
+        ./nixos/desktop-personal.nix
+        home-manager.nixosModules.home-manager {
+          home-manager.extraSpecialArgs = { inherit nix-colors; };
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users."chris" = import ./home-personal.nix; # Use same personal profile (Linux compatible)
+        }
+      ];
+    };
+
+    # Convenience: package set for primary (work) Mac config
+    darwinPackages = self.darwinConfigurations."macbook-spw".pkgs;
   };
 }
