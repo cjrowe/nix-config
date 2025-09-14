@@ -27,13 +27,16 @@ in
     python313
     typescript
     open-policy-agent
+    volta
   ];
   home.sessionVariables = {
     EDITOR = "vim";
 
     AWS_CA_BUNDLE = "/Users/chris.rowe/.certs/Cloud-Services-Root-CA.pem";
     NODE_EXTRA_CA_CERTS = "/Users/chris.rowe/.certs/Cloud-Services-Root-CA.pem";
-    REQUESTS_CA_BUNDLE = "/Users/chris.rowe/.certs/Cloud-Services-Root-CA.pem"; 
+    REQUESTS_CA_BUNDLE = "/Users/chris.rowe/.certs/Cloud-Services-Root-CA.pem";
+
+    VOLTA_HOME = "$HOME/.volta";
   };
 
   programs.zsh = {
@@ -41,6 +44,9 @@ in
     history = {
       ignoreAllDups = true;
       share = true;
+      append = true;
+      save = 1000;
+      expireDuplicatesFirst = true;
     };
     initExtra = ''
       sh ${nix-colors-lib.shellThemeFromScheme { scheme = config.colorScheme; }}
