@@ -1,5 +1,0 @@
-{
-  # Copy to home-identity.nix and set the single email relevant to this machine.
-  # File is gitignored; keep your real address private.
-  email = "user@example.invalid";
-}

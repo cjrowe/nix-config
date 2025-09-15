@@ -23,6 +23,19 @@ in
     nix-colors.homeManagerModules.default
   ];
 
+  # Fail fast if we forgot to pass a Git email (prevents silently missing identity
+  # and later git commit errors). The work/personal profiles should supply
+  # gitUserEmail via their local `home-identity.nix` (gitignored) or a default.
+  assertions = [
+    {
+      assertion = gitUserEmail != null;
+      message = ''home-common.nix: gitUserEmail is null.
+Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
+  GIT_USER_EMAIL="you@domain" sudo -E darwin-rebuild switch --impure --flake .#macbook-spw
+'';
+    }
+  ];
+
   colorScheme = nix-colors.colorSchemes.catppuccin-mocha;
 
   home.stateVersion = "24.05";

@@ -1,11 +1,8 @@
 { config, pkgs, nix-colors, ...}:
 let
-  identity = if builtins.pathExists ./home-identity.nix
-    then import ./home-identity.nix
-    else { email = null; };
-in
-import ./home-common.nix {
+  gitEmail = let v = builtins.getEnv "GIT_USER_EMAIL"; in if v == "" then null else v;
+in import ./home-common.nix {
   inherit config pkgs nix-colors;
-  gitUserEmail = identity.email; # provided via untracked file
+  gitUserEmail = gitEmail; # from environment only
   includeCorporateCA = false;
 }

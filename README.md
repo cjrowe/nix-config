@@ -145,26 +145,28 @@ For the work profile, the CA path is hard-coded in:
 - `home.nix` (via `home-common.nix` params)
 You can extract this into a secret or environment-specific overlay later if needed.
 
-## Private Git Identity (Hiding Emails)
-Real email addresses are no longer stored in tracked files. Instead a local, untracked file can be used:
+## Git Identity Handling (Env Only)
+Email identity is now sourced exclusively from the environment variable `GIT_USER_EMAIL` during rebuilds. This avoids committing any real addresses while keeping configuration deterministic otherwise.
 
-1. Copy the template:
-	```bash
-	cp home-identity.nix.example home-identity.nix
-	```
-2. Edit `home-identity.nix` with your real addresses:
-	```nix
-		 { email = "me@example.com"; }
-	```
-3. Rebuild as normal.
+Usage (work machine example):
+```bash
+GIT_USER_EMAIL="chris.rowe@spw.com" sudo -E darwin-rebuild switch --impure --flake .#macbook-spw
+```
 
-If the file is absent, `gitUserEmail` remains unset in the Home Manager Git module, and your global Git config (if any) applies. This keeps emails out of the public branch while preserving reproducibility otherwise.
+Personal host:
+```bash
+GIT_USER_EMAIL="chris@rowe.cloud" sudo -E darwin-rebuild switch --impure --flake .#macbook-personal
+```
 
-Alternative strategies:
-- Use environment variables and pass them with `--impure` (reduces purity)
-- Reference a private flake input (`inputs.private-secrets.url = "path:../my-private-secrets";`)
-- Manage identity entirely outside Nix (`git config --global user.email ...`)
-- Rewrite repository history (e.g. `git filter-repo`) to purge prior commits (destructive; optional)
+Notes:
+- `--impure` is required so `builtins.getEnv` can read the variable.
+- The flake asserts if `GIT_USER_EMAIL` is missing.
+- You can wrap this in a small script or direnv layout to reduce typing.
+
+Alternative strategies (not currently enabled):
+- Private flake input containing secrets
+- Managing identity entirely via `git config --global`
+- Repo-local `.git/config` overrides
 
 
 ## Extending
