@@ -23,6 +23,10 @@
     tldr
   ];
 
+  fonts.packages = [
+    pkgs.nerd-fonts.jetbrains-mono
+  ];
+
   # nix.package = pkgs.nix;
 
   # Necessary for using flakes on this system.

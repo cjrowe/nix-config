@@ -42,8 +42,9 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
   programs.home-manager.enable = true;
 
   home.packages = let
+    jetBrainsMonoNerdFont = pkgs.nerd-fonts.jetbrains-mono;
     platformExtras = if pkgs.stdenv.isLinux then [ pkgs.xclip pkgs.wl-clipboard ] else [ ];
-  in with pkgs; [
+    basePackages = with pkgs; [
     _1password-cli
     gh
     terraform
@@ -58,7 +59,8 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     typescript
     open-policy-agent
     volta
-  ] ++ platformExtras;
+  ];
+  in basePackages ++ [ jetBrainsMonoNerdFont ] ++ platformExtras;
 
   home.sessionVariables = {
     EDITOR = "vim";
