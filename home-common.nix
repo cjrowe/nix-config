@@ -57,7 +57,6 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     yarn
     python313
     typescript
-    open-policy-agent
     volta
   ];
   in basePackages ++ [ jetBrainsMonoNerdFont ] ++ platformExtras;
