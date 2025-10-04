@@ -27,9 +27,6 @@
     pkgs.nerd-fonts.jetbrains-mono
   ];
 
-  # Disable Nix managment - handled by Determinate Nix
-  nix.enable = false;
-
   # nix.package = pkgs.nix;
 
   # Necessary for using flakes on this system.

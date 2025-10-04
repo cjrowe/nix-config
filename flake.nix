@@ -25,6 +25,7 @@
       specialArgs = { inherit nix-colors; };
       modules = [
         ./configuration.nix
+
         home-manager.darwinModules.home-manager {
           home-manager.extraSpecialArgs = { inherit nix-colors; };
           home-manager.useGlobalPkgs = true;
