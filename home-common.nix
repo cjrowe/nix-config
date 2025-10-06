@@ -103,10 +103,6 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     let base = {
       enable = true;
       userName = "Chris Rowe";
-      signing = {
-        signByDefault = true;
-        key = "0x1813F3955C9120C1";
-      };
       extraConfig = if includeCorporateCA && caCertPath != null then {
         http.sslCAPath = caCertPath;
       } else {};
