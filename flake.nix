@@ -13,9 +13,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-colors.url = "github:misterio77/nix-colors";
+    ghostty = {
+      url = "github:ghostty-org/ghostty";
+    };
   };
 
-  outputs = { self, nix-darwin, nixpkgs, home-manager, nix-colors, ... }@inputs:
+  outputs = { self, nix-darwin, nixpkgs, home-manager, nix-colors, ghostty, ... }@inputs:
   {
     # Build Darwin configs using:
     # $ darwin-rebuild switch --flake .#macbook-spw
@@ -25,12 +28,12 @@
     # Work Mac (renamed)
     ##############################
     darwinConfigurations."macbook-spw" = nix-darwin.lib.darwinSystem {
-      specialArgs = { inherit nix-colors; };
+      specialArgs = { inherit nix-colors ghostty; };
       modules = [
         ./configuration.nix
 
         home-manager.darwinModules.home-manager {
-          home-manager.extraSpecialArgs = { inherit nix-colors; };
+          home-manager.extraSpecialArgs = { inherit nix-colors ghostty; };
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users."chris.rowe" = import ./home.nix; # Work profile
@@ -42,7 +45,7 @@
     # Personal Mac
     ##############################
     darwinConfigurations."macbook-personal" = nix-darwin.lib.darwinSystem {
-      specialArgs = { inherit nix-colors; };
+      specialArgs = { inherit nix-colors ghostty; };
       modules = [
         ./configuration.nix
         # Override / extend any Darwin-specific settings if needed later via an inline module
@@ -51,7 +54,7 @@
           networking.hostName = "macbook-personal";
         })
         home-manager.darwinModules.home-manager {
-          home-manager.extraSpecialArgs = { inherit nix-colors; };
+          home-manager.extraSpecialArgs = { inherit nix-colors ghostty; };
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users."chris.rowe" = import ./home-personal.nix; # Personal profile
@@ -64,11 +67,11 @@
     ##############################
     nixosConfigurations."desktop-personal" = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux"; # WSL / desktop architecture assumption
-      specialArgs = { inherit nix-colors; };
+      specialArgs = { inherit nix-colors ghostty; };
       modules = [
         ./nixos/desktop-personal.nix
         home-manager.nixosModules.home-manager {
-          home-manager.extraSpecialArgs = { inherit nix-colors; };
+          home-manager.extraSpecialArgs = { inherit nix-colors ghostty; };
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.users."chris" = import ./home-personal.nix; # Use same personal profile (Linux compatible)

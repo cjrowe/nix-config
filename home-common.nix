@@ -1,6 +1,7 @@
 { config
 , pkgs
 , nix-colors
+, ghostty
 , asciiArtFile ? null
 , gitUserEmail ? null
 , includeCorporateCA ? false
@@ -43,6 +44,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
 
   home.packages = let
     jetBrainsMonoNerdFont = pkgs.nerd-fonts.jetbrains-mono;
+    ghosttyPkg = if pkgs.stdenv.isLinux then [ ghostty.packages.${pkgs.system}.default ] else [ ];
     platformExtras = if pkgs.stdenv.isLinux then [ pkgs.xclip pkgs.wl-clipboard ] else [ ];
     basePackages = with pkgs; [
     _1password-cli
@@ -59,7 +61,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     typescript
     volta
   ];
-  in basePackages ++ [ jetBrainsMonoNerdFont ] ++ platformExtras;
+  in basePackages ++ [ jetBrainsMonoNerdFont ] ++ ghosttyPkg ++ platformExtras;
 
   home.sessionVariables = {
     EDITOR = "vim";
