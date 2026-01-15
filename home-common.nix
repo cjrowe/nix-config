@@ -152,6 +152,8 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     mutableTrust = true;
   };
 
+  programs.uv.enable = true;
+
   programs.neovim =
   let
     toLua = str: "lua << EOF\n${str}\nEOF\n";
