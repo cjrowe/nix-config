@@ -50,7 +50,9 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     _1password-cli
     gh
     terraform
+    github-copilot-cli
     husky
+    jfrog-cli
     yamlfmt
     yamllint
     cacert
