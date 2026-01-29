@@ -53,6 +53,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     github-copilot-cli
     husky
     jfrog-cli
+    mise
     yamlfmt
     yamllint
     cacert
