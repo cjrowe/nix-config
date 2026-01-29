@@ -53,7 +53,6 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     github-copilot-cli
     husky
     jfrog-cli
-    mise
     yamlfmt
     yamllint
     cacert
@@ -84,6 +83,11 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
       sh ${nix-colors-lib.shellThemeFromScheme { scheme = config.colorScheme; }}
       ${ascii}
     '';
+  };
+
+  programs.mise = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   programs.eza = {
