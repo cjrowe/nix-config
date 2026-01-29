@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "https://flakehub.com/f/nix-community/home-manager/0.2505.4813";
+      url = "https://flakehub.com/f/nix-community/home-manager/0.2511.5855";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-colors.url = "github:misterio77/nix-colors";
