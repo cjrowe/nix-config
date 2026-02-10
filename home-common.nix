@@ -51,6 +51,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     gh
     terraform
     github-copilot-cli
+    goose-cli  
     husky
     jfrog-cli
     yamlfmt
