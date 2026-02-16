@@ -98,6 +98,12 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     icons = "auto";
   };
 
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    tmux.enableShellIntegration = true;
+  };
+
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
@@ -109,15 +115,15 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     enableZshIntegration = true;
   };
 
-  programs.git =
+  programs.git = 
     let base = {
       enable = true;
-      userName = "Chris Rowe";
-      extraConfig = if includeCorporateCA && caCertPath != null then {
-        http.sslCAPath = caCertPath;
-      } else {};
+      settings = {
+        user.name = "Chris Rowe";
+        http.sslCAPath = if includeCorporateCA && caCertPath != null then caCertPath else null;
+      };
     }; in
-    if gitUserEmail != null then base // { userEmail = gitUserEmail; } else base;
+    if gitUserEmail != null then base // { settings.user.email = gitUserEmail; } else base;
 
   programs.starship = {
     enable = true;
@@ -127,8 +133,109 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
 
   programs.tmux = {
     enable = true;
+
+    baseIndex = 1;
     clock24 = true;
+    historyLimit = 100000;
     keyMode = "vi";
+    mouse = true;
+    prefix = "^A";
+    sensibleOnTop = true;
+    plugins = with pkgs.tmuxPlugins; [
+      catppuccin
+      continuum
+      resurrect
+      tmux-floax
+      tmux-sessionx
+      yank
+    ];
+    extraConfig = ''
+      set -g renumber-windows on
+      set -g set-clipboard on
+      set -g status-position top
+      set -g pane-active-border-style 'fg=magenta,bg=default'
+      set -g pane-border-style 'fg=brightblack,bg=default'
+
+      set -g @catppuccin_window_left_separator ""
+      set -g @catppuccin_window_right_separator " "
+      set -g @catppuccin_window_middle_separator " █"
+      set -g @catppuccin_window_number_position "right"
+      set -g @catppuccin_window_default_fill "number"
+      set -g @catppuccin_window_default_text "#W"
+      set -g @catppuccin_window_current_fill "number"
+      set -g @catppuccin_window_current_text "#W#{?window_zoomed_flag,(),}"
+      set -g @catppuccin_status_modules_right "directory" # date_time"
+      set -g @catppuccin_status_modules_left "session"
+      set -g @catppuccin_status_left_separator  " "
+      set -g @catppuccin_status_right_separator " "
+      set -g @catppuccin_status_right_separator_inverse "no"
+      set -g @catppuccin_status_fill "icon"
+      set -g @catppuccin_status_connect_separator "no"
+      set -g @catppuccin_directory_text "#{b:pane_current_path}"
+
+      set -g @continuum-restore 'on'
+
+      set -g @floax-width '80%'
+      set -g @floax-height '80%'
+      set -g @floax-border-color 'magenta'
+      set -g @floax-text-color 'blue'
+      set -g @floax-bind 'p'
+      set -g @floax-change-path 'true'
+
+      set -g @fzf-url-fzf-options '-p 60%,30% --prompt="   " --border-label=" Open URL "'
+      set -g @fzf-url-history-limit '2000'
+
+      set -g @resurrect-strategy-nvim 'session'
+
+      set -g @sessionx-bind-zo-new-window 'ctrl-y'
+      set -g @sessionx-auto-accept 'off'
+      set -g @sessionx-custom-paths '/Users/omerxx/dotfiles'
+      set -g @sessionx-bind 'o'
+      set -g @sessionx-x-path '~/dotfiles'
+      set -g @sessionx-window-height '85%'
+      set -g @sessionx-window-width '75%'
+      set -g @sessionx-zoxide-mode 'on'
+      set -g @sessionx-custom-paths-subdirectories 'false'
+      set -g @sessionx-filter-current 'false'
+
+      bind ^X lock-server
+      bind ^C new-window -c "$HOME"
+      bind ^D detach
+      bind * list-clients
+
+      bind H previous-window
+      bind L next-window
+
+      bind r command-prompt "rename-window %%"
+      bind R source-file ~/.config/tmux/tmux.conf
+      bind ^A last-window
+      bind ^W list-windows
+      bind w list-windows
+      bind z resize-pane -Z
+      bind ^L refresh-client
+      bind l refresh-client
+      bind | split-window
+      bind s split-window -v -c "#{pane_current_path}"
+      bind v split-window -h -c "#{pane_current_path}"
+      bind '"' choose-window
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+      bind -r -T prefix , resize-pane -L 20
+      bind -r -T prefix . resize-pane -R 20
+      bind -r -T prefix - resize-pane -D 7
+      bind -r -T prefix = resize-pane -U 7
+      bind : command-prompt
+      bind * setw synchronize-panes
+      bind P set pane-border-status
+      bind c kill-pane
+      bind x swap-pane -D
+      bind S choose-session
+      bind R source-file ~/.config/tmux/tmux.conf
+      bind K send-keys "clear"\; send-keys "Enter"
+      bind-key -T copy-mode-vi v send-keys -X begin-selection
+    '';
   };
 
   programs.zoxide = {

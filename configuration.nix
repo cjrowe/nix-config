@@ -15,7 +15,6 @@
     fastfetch
     bat
     awscli2
-    fzf
     ripgrep
     fd
     jq
