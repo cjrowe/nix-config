@@ -189,13 +189,10 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
 
       set -g @sessionx-bind-zo-new-window 'ctrl-y'
       set -g @sessionx-auto-accept 'off'
-      set -g @sessionx-custom-paths '/Users/omerxx/dotfiles'
       set -g @sessionx-bind 'o'
-      set -g @sessionx-x-path '~/dotfiles'
       set -g @sessionx-window-height '85%'
       set -g @sessionx-window-width '75%'
       set -g @sessionx-zoxide-mode 'on'
-      set -g @sessionx-custom-paths-subdirectories 'false'
       set -g @sessionx-filter-current 'false'
 
       bind ^X lock-server
