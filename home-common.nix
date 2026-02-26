@@ -122,6 +122,9 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
         user.name = "Chris Rowe";
         http.sslCAPath = if includeCorporateCA && caCertPath != null then caCertPath else null;
       };
+      lfs = {
+        enable = true;
+      };
     }; in
     if gitUserEmail != null then base // { settings.user.email = gitUserEmail; } else base;
 
