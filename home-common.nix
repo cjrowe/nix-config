@@ -134,11 +134,6 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     settings.add_newline = false;
   };
 
-  programs.television = {
-    enable = true;
-    enableZshIntegration = true;
-  };
-
   programs.tmux = {
     enable = true;
 
