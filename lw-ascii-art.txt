@@ -12,6 +12,11 @@
 │   LLOYDS WEALTH MANAGEMENT SYSTEM                                          │
 │   (C) 2026 LLOYDS BANKING GROUP  —  ALL RIGHTS RESERVED                    │
 │                                                                            │
+│   USERNAME      : {{USERNAME________}}                                     │
+│   LAST LOGIN    : {{LAST_LOGIN______}}                                     │
+│                                                                            │
 │   AUTHORISED ACCESS ONLY. ALL SESSIONS ARE MONITORED AND RECORDED.         │
 │                                                                            │
+│  ════════════════════════════════════════════════════════════════════════  │
+│                                           TERM-ID : {{TERMINAL_ID_____}}   │
 └────────────────────────────────────────────────────────────────────────────┘

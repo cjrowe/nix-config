@@ -17,7 +17,39 @@ let
     NODE_EXTRA_CA_CERTS = caCertPath;
     REQUESTS_CA_BUNDLE = caCertPath;
   } else {};
-  ascii = if asciiArtFile != null then "cat ${asciiArtFile}" else "";
+  ascii = if asciiArtFile != null then ''
+    _lw_user="''${USER:-$(id -un 2>/dev/null || echo unknown)}"
+    _lw_terminal_id=$(hostname -s 2>/dev/null || hostname)
+    _lw_now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    _lw_state_file="$HOME/.cache/lw-last-login"
+
+    _lw_user=$(printf '%s' "$_lw_user" | tr '[:lower:]' '[:upper:]')
+    _lw_terminal_id=$(printf '%s' "$_lw_terminal_id" | tr '[:lower:]' '[:upper:]')
+
+    if [ -r "$_lw_state_file" ]; then
+      _lw_last=$(head -n 1 "$_lw_state_file")
+    else
+      _lw_last="$_lw_now"
+    fi
+
+    mkdir -p "$HOME/.cache"
+    printf '%s\n' "$_lw_now" > "$_lw_state_file"
+
+    _lw_user=$(printf '%-20.20s' "$_lw_user")
+    _lw_terminal_id=$(printf '%-20.20s' "$_lw_terminal_id")
+    _lw_last=$(printf '%-20.20s' "$_lw_last")
+
+    awk -v user="$_lw_user" -v terminal_id="$_lw_terminal_id" -v last_login="$_lw_last" '
+      {
+        gsub(/\{\{USERNAME________\}\}/, user)
+        gsub(/\{\{TERMINAL_ID_____\}\}/, terminal_id)
+        gsub(/\{\{LAST_LOGIN______\}\}/, last_login)
+        print
+      }
+    ' ${asciiArtFile}
+
+    unset _lw_user _lw_terminal_id _lw_last _lw_now _lw_state_file
+  '' else "";
 in
 {
   imports = [
@@ -41,6 +73,10 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
 
   home.stateVersion = "24.05";
   programs.home-manager.enable = true;
+
+  home.file = pkgs.lib.optionalAttrs (asciiArtFile != null) {
+    ".hushlogin".text = "";
+  };
 
   home.packages = let
     jetBrainsMonoNerdFont = pkgs.nerd-fonts.jetbrains-mono;
