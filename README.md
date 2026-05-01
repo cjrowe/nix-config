@@ -41,7 +41,7 @@ nvim/                     # Lua plugin configs & options for Neovim
 	options.lua
 	plugin/*.lua
 icons/                    # Optional lf icons set
-spw-ascii-art.txt         # ASCII banner shown only on work profile
+lw-ascii-art.txt          # ASCII banner shown only on work profile
 README.md
 ```
 
