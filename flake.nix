@@ -2,14 +2,14 @@
   description = "Example Darwin system flake";
 
   inputs = {
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
     nix-darwin = {
-      url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "https://flakehub.com/f/nix-community/home-manager/0.2511.5855";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-colors.url = "github:misterio77/nix-colors";

@@ -51,7 +51,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     gh
     terraform
     github-copilot-cli
-    goose-cli  
+    # goose-cli # temporarily removed — broken in nixpkgs-unstable (upstream Rust compile bug)
     husky
     jfrog-cli
     yamlfmt
@@ -118,6 +118,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
   programs.git = 
     let base = {
       enable = true;
+      signing.format = "openpgp";
       settings = {
         user.name = "Chris Rowe";
         http.sslCAPath = if includeCorporateCA && caCertPath != null then caCertPath else null;
@@ -271,13 +272,14 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
 
   programs.neovim =
   let
-    toLua = str: "lua << EOF\n${str}\nEOF\n";
-    toLuaFile = file: "lua << EOF\n${builtins.readFile file}\nEOF\n";
+    toLuaFile = file: builtins.readFile file;
   in {
     enable = true;
     viAlias = true;
     vimAlias = true;
     vimdiffAlias = true;
+    withRuby = false;
+    withPython3 = false;
     extraPackages =
       let
         linuxClipboard = with pkgs; (if pkgs.stdenv.isLinux then [ xclip wl-clipboard ] else []);
@@ -295,19 +297,19 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
     let NERDTreeSortHiddenFirst=1
     let NERDTreeShowHidden=1
     '';
-    extraLuaConfig = ''
+    initLua = ''
       ${builtins.readFile ./nvim/options.lua}
     '';
     plugins = with pkgs.vimPlugins; [
-      { plugin = nvim-lspconfig; config = toLuaFile ./nvim/plugin/lsp.lua; }
+      { plugin = nvim-lspconfig; config = toLuaFile ./nvim/plugin/lsp.lua; type = "lua"; }
       typescript-tools-nvim
       cmp-nvim-lsp
-      { plugin = ale; config = toLuaFile ./nvim/plugin/ale.lua; }
-      { plugin = comment-nvim; config = toLua "require(\"Comment\").setup()"; }
-      { plugin = nix-colors-lib.vimThemeFromScheme { scheme = config.colorScheme; }; config = "colorscheme nix-${config.colorScheme.slug}"; }
+      { plugin = ale; config = toLuaFile ./nvim/plugin/ale.lua; type = "lua"; }
+      { plugin = comment-nvim; config = "require(\"Comment\").setup()"; type = "lua"; }
+      { plugin = nix-colors-lib.vimThemeFromScheme { scheme = config.colorScheme; }; config = "colorscheme nix-${config.colorScheme.slug}"; type = "viml"; }
       neodev-nvim
-      { plugin = nvim-cmp; config = toLuaFile ./nvim/plugin/cmp.lua; }
-      { plugin = telescope-nvim; config = toLuaFile ./nvim/plugin/telescope.lua; }
+      { plugin = nvim-cmp; config = toLuaFile ./nvim/plugin/cmp.lua; type = "lua"; }
+      { plugin = telescope-nvim; config = toLuaFile ./nvim/plugin/telescope.lua; type = "lua"; }
       telescope-fzf-native-nvim
       nerdtree
       cmp_luasnip
@@ -315,7 +317,7 @@ Set GIT_USER_EMAIL in your environment and rebuild, e.g.:
       friendly-snippets
       lualine-nvim
       nvim-web-devicons
-      { plugin = nvim-treesitter.withAllGrammars; config = toLuaFile ./nvim/plugin/treesitter.lua; }
+      { plugin = nvim-treesitter.withAllGrammars; config = toLuaFile ./nvim/plugin/treesitter.lua; type = "lua"; }
       vim-nix
     ];
   };
